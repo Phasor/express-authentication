@@ -5,6 +5,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const mongoDb = process.env.DB_URL;
@@ -96,16 +97,26 @@ app.get("/log-out", (req, res) => {
 
 // simple post route, WE SHOULD BE SANITISING THE INPUTS!
 app.post("/sign-up", (req, res, next) => {
-    const user  = new User({
-        username: req.body.username,
-        password: req.body.password
-    }).save(err => {
-        if(err) {
-            return next(err);
+        bcrypt.hash(req.body.password, 10, (error, hashedPassword) => {
+        // if err, do something
+        if (error) {
+            console.log(error);
+            res.redirect("/sign-up", { error: error });
         }
-        res.redirect("/");
-    })
+
+        // otherwise, store hashedPassword in DB
+        const user  = new User({
+            username: req.body.username,
+            password: hashedPassword
+        }).save(err => {
+            if(err) {
+                return next(err);
+            }
+            res.redirect("/");
+        })   
+      });    
 })
+
 app.post(
     "/log-in",
     passport.authenticate("local", {
