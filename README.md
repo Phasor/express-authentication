@@ -6,3 +6,5 @@ https://www.passportjs.org/
 
 Add .env file for the DB url connection string.
 `node app.js`
+
+https://www.theodinproject.com/lessons/nodejs-authentication-basics
